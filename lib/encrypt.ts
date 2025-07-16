@@ -1,18 +1,21 @@
 const encoder = new TextEncoder();
 
-// Validamos que la variable exista y tenga contenido
-const envKey = process.env.ENCRYPTION_KEY;
+// Función para obtener la clave de forma lazy
+const getEncryptionKey = (): Uint8Array => {
+  const envKey = process.env.ENCRYPTION_KEY;
 
-if (!envKey || envKey.trim() === '') {
-  throw new Error(
-    'ENCRYPTION_KEY is not defined or is empty in the environment variables'
-  );
-}
+  if (!envKey || envKey.trim() === '') {
+    throw new Error(
+      'ENCRYPTION_KEY is not defined or is empty in the environment variables'
+    );
+  }
 
-const key = encoder.encode(envKey);
+  return encoder.encode(envKey);
+};
 
 // Función para hashear una contraseña con HMAC-SHA-256
 export const hash = async (plainPassword: string): Promise<string> => {
+  const key = getEncryptionKey(); // Validación lazy aquí
   const passwordData = encoder.encode(plainPassword);
 
   const cryptoKey = await crypto.subtle.importKey(
