@@ -7,29 +7,37 @@ import Rating from './rating';
 
 const ProductCard = ({ product }: { product: Product }) => {
   return (
-    <Card className='w-full max-w-sm'>
-      <CardHeader className='p-0 items-center'>
+    <Card className='w-full max-w-sm border border-border shadow-sm rounded-xl hover:shadow-md transition'>
+      <CardHeader className='p-0'>
         <Link href={`/product/${product.slug}`}>
           <Image
             src={product.images[0]}
             alt={product.name}
             height={300}
             width={300}
-            priority={true}
+            priority
+            className='rounded-t-xl object-cover w-full h-auto transition-transform hover:scale-105'
           />
         </Link>
       </CardHeader>
-      <CardContent className='p-4 grid gap-4'>
-        <div className='text-xs'>{product.brand}</div>
+
+      <CardContent className='p-4 grid gap-2'>
+        <p className='text-xs text-muted-foreground'>{product.brand}</p>
+
         <Link href={`/product/${product.slug}`}>
-          <h2 className='text-sm font-medium'>{product.name}</h2>
+          <h2 className='text-sm font-semibold text-foreground hover:underline line-clamp-2'>
+            {product.name}
+          </h2>
         </Link>
-        <div className='flex-between gap-4'>
+
+        <div className='flex items-center justify-between mt-2'>
           <Rating value={Number(product.rating)} />
           {product.stock > 0 ? (
             <ProductPrice value={Number(product.price)} />
           ) : (
-            <p className='text-destructive'>Out Of Stock</p>
+            <span className='text-sm text-destructive font-medium'>
+              Out of Stock
+            </span>
           )}
         </div>
       </CardContent>

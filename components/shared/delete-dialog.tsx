@@ -1,6 +1,6 @@
 'use client';
-import { useState } from 'react';
-import { useTransition } from 'react';
+
+import { useState, useTransition } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '../ui/button';
 import {
@@ -14,13 +14,12 @@ import {
   AlertDialogTrigger,
 } from '../ui/alert-dialog';
 
-const DeleteDialog = ({
-  id,
-  action,
-}: {
+type DeleteDialogProps = {
   id: string;
   action: (id: string) => Promise<{ success: boolean; message: string }>;
-}) => {
+};
+
+const DeleteDialog = ({ id, action }: DeleteDialogProps) => {
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
@@ -54,18 +53,20 @@ const DeleteDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone
+            This action cannot be undone. This will permanently delete the item
+            and remove it from our servers.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <Button
             variant='destructive'
             size='sm'
-            disabled={isPending}
             onClick={handleDeleteClick}
+            disabled={isPending}
+            className='ml-auto'
           >
-            {isPending ? 'Deleting...' : 'Delete'}
+            {isPending ? 'Deleting...' : 'Confirm Delete'}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>

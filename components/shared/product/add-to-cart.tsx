@@ -1,4 +1,5 @@
 'use client';
+
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Plus, Minus, Loader } from 'lucide-react';
@@ -11,7 +12,6 @@ import { useTransition } from 'react';
 const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
   const router = useRouter();
   const { toast } = useToast();
-
   const [isPending, startTransition] = useTransition();
 
   const handleAddToCart = async () => {
@@ -26,12 +26,11 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
         return;
       }
 
-      // Handle success add to cart
       toast({
         description: res.message,
         action: (
           <ToastAction
-            className='bg-primary text-white hover:bg-gray-800'
+            className='bg-primary text-white hover:bg-primary/90'
             altText='Go To Cart'
             onClick={() => router.push('/cart')}
           >
@@ -42,7 +41,6 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
     });
   };
 
-  // Handle remove from cart
   const handleRemoveFromCart = async () => {
     startTransition(async () => {
       const res = await removeItemFromCart(item.productId);
@@ -51,26 +49,38 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
         variant: res.success ? 'default' : 'destructive',
         description: res.message,
       });
-
-      return;
     });
   };
 
-  // Check if item is in cart
-  const existItem =
-    cart && cart.items.find((x) => x.productId === item.productId);
+  const existItem = cart?.items.find((x) => x.productId === item.productId);
 
   return existItem ? (
-    <div>
-      <Button type='button' variant='outline' onClick={handleRemoveFromCart}>
+    <div className='flex items-center gap-2'>
+      <Button
+        type='button'
+        variant='outline'
+        size='icon'
+        onClick={handleRemoveFromCart}
+        className='w-10 h-10'
+        disabled={isPending}
+      >
         {isPending ? (
           <Loader className='w-4 h-4 animate-spin' />
         ) : (
           <Minus className='w-4 h-4' />
         )}
       </Button>
-      <span className='px-2'>{existItem.qty}</span>
-      <Button type='button' variant='outline' onClick={handleAddToCart}>
+
+      <span className='text-sm font-medium px-2'>{existItem.qty}</span>
+
+      <Button
+        type='button'
+        variant='outline'
+        size='icon'
+        onClick={handleAddToCart}
+        className='w-10 h-10'
+        disabled={isPending}
+      >
         {isPending ? (
           <Loader className='w-4 h-4 animate-spin' />
         ) : (
@@ -79,12 +89,17 @@ const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
       </Button>
     </div>
   ) : (
-    <Button className='w-full' type='button' onClick={handleAddToCart}>
+    <Button
+      className='w-full flex gap-2'
+      type='button'
+      onClick={handleAddToCart}
+      disabled={isPending}
+    >
       {isPending ? (
         <Loader className='w-4 h-4 animate-spin' />
       ) : (
         <Plus className='w-4 h-4' />
-      )}{' '}
+      )}
       Add To Cart
     </Button>
   );

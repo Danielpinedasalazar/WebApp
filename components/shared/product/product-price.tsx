@@ -1,22 +1,26 @@
 import { cn } from '@/lib/utils';
 
-const ProductPrice = ({
-  value,
-  className,
-}: {
+type ProductPriceProps = {
   value: number;
   className?: string;
-}) => {
-  // Ensure two decimal places
+};
+
+const ProductPrice = ({ value, className }: ProductPriceProps) => {
   const stringValue = value.toFixed(2);
-  // Get the int/float
   const [intValue, floatValue] = stringValue.split('.');
 
   return (
-    <p className={cn('text-2xl', className)}>
-      <span className='text-xs align-super'>$</span>
+    <p
+      className={cn(
+        'text-xl font-semibold text-foreground tracking-tight',
+        className
+      )}
+    >
+      <span className='text-sm align-super text-muted-foreground'>$</span>
       {intValue}
-      <span className='text-xs align-super'>.{floatValue}</span>
+      <span className='text-sm align-super text-muted-foreground'>
+        .{floatValue}
+      </span>
     </p>
   );
 };

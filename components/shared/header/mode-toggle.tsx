@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuContent,
-  DropdownMenuCheckboxItem,
+  DropdownMenuItem,
 } from '@/components/ui/dropdown-menu';
 import { useTheme } from 'next-themes';
 import { SunIcon, MoonIcon, SunMoon } from 'lucide-react';
@@ -20,47 +21,45 @@ const ModeToggle = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null;
-  }
+  if (!mounted) return null;
+
+  const currentIcon =
+    theme === 'system' ? (
+      <SunMoon className='w-4 h-4' />
+    ) : theme === 'dark' ? (
+      <MoonIcon className='w-4 h-4' />
+    ) : (
+      <SunIcon className='w-4 h-4' />
+    );
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           variant='ghost'
+          size='icon'
           className='focus-visible:ring-0 focus-visible:ring-offset-0'
         >
-          {theme === 'system' ? (
-            <SunMoon />
-          ) : theme === 'dark' ? (
-            <MoonIcon />
-          ) : (
-            <SunIcon />
-          )}
+          {currentIcon}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
-        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
+
+      <DropdownMenuContent align='end' className='w-40'>
+        <DropdownMenuLabel className='text-xs'>Appearance</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuCheckboxItem
-          checked={theme === 'system'}
-          onClick={() => setTheme('system')}
-        >
+
+        <DropdownMenuItem onClick={() => setTheme('system')}>
+          <SunMoon className='mr-2 w-4 h-4' />
           System
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={theme === 'dark'}
-          onClick={() => setTheme('dark')}
-        >
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('dark')}>
+          <MoonIcon className='mr-2 w-4 h-4' />
           Dark
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={theme === 'light'}
-          onClick={() => setTheme('light')}
-        >
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('light')}>
+          <SunIcon className='mr-2 w-4 h-4' />
           Light
-        </DropdownMenuCheckboxItem>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

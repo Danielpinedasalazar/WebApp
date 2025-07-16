@@ -1,42 +1,50 @@
 import { DollarSign, Headset, ShoppingBag, WalletCards } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+
+const items = [
+  {
+    icon: ShoppingBag,
+    title: 'Free Shipping',
+    description: 'Free shipping on orders above $100',
+  },
+  {
+    icon: DollarSign,
+    title: 'Money Back Guarantee',
+    description: 'Within 30 days of purchase',
+  },
+  {
+    icon: WalletCards,
+    title: 'Flexible Payment',
+    description: 'Pay with credit card, PayPal or COD',
+  },
+  {
+    icon: Headset,
+    title: '24/7 Support',
+    description: 'Get support at any time',
+  },
+];
 
 const IconBoxes = () => {
   return (
-    <div>
-      <Card>
-        <CardContent className='grid md:grid-cols-4 gap-4 p-4'>
-          <div className='space-y-2'>
-            <ShoppingBag />
-            <div className='text-sm font-bold'>Free Shipping</div>
-            <div className='text-sm text-muted-foreground'>
-              Free shipping on orders above $100
+    <section className='py-6'>
+      <Card className='bg-background border border-border shadow-sm rounded-xl'>
+        <CardContent className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6'>
+          {items.map(({ icon: Icon, title, description }, idx) => (
+            <div key={idx} className='flex items-start gap-4'>
+              <div className='bg-muted text-primary p-3 rounded-xl'>
+                <Icon className='w-5 h-5' />
+              </div>
+              <div>
+                <div className='text-sm font-semibold'>{title}</div>
+                <div className='text-sm text-muted-foreground'>
+                  {description}
+                </div>
+              </div>
             </div>
-          </div>
-          <div className='space-y-2'>
-            <DollarSign />
-            <div className='text-sm font-bold'>Money Back Guarantee</div>
-            <div className='text-sm text-muted-foreground'>
-              Within 30 days of purchase
-            </div>
-          </div>
-          <div className='space-y-2'>
-            <WalletCards />
-            <div className='text-sm font-bold'>Flexible Payment</div>
-            <div className='text-sm text-muted-foreground'>
-              Pay with credit card, PayPal or COD
-            </div>
-          </div>
-          <div className='space-y-2'>
-            <Headset />
-            <div className='text-sm font-bold'>24/7 Support</div>
-            <div className='text-sm text-muted-foreground'>
-              Get support at any time
-            </div>
-          </div>
+          ))}
         </CardContent>
       </Card>
-    </div>
+    </section>
   );
 };
 

@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
@@ -8,25 +9,35 @@ const ProductImages = ({ images }: { images: string[] }) => {
 
   return (
     <div className='space-y-4'>
-      <Image
-        src={images[current]}
-        alt='product image'
-        width={1000}
-        height={1000}
-        className='min-h-[300px] object-cover object-center'
-      />
-      <div className='flex'>
+      <div className='relative w-full aspect-square overflow-hidden rounded-xl border border-border shadow-sm'>
+        <Image
+          src={images[current]}
+          alt='product image'
+          fill
+          className='object-cover object-center'
+          priority
+        />
+      </div>
+
+      <div className='flex gap-3 overflow-x-auto'>
         {images.map((image, index) => (
-          <div
+          <button
             key={image}
             onClick={() => setCurrent(index)}
             className={cn(
-              'border mr-2 cursor-pointer hover:border-orange-600',
-              current === index && 'border-orange-500'
+              'relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden border transition-colors duration-200',
+              current === index
+                ? 'border-primary ring-2 ring-primary'
+                : 'border-border hover:border-primary'
             )}
           >
-            <Image src={image} alt='image' width={100} height={100} />
-          </div>
+            <Image
+              src={image}
+              alt='thumbnail'
+              fill
+              className='object-cover object-center'
+            />
+          </button>
         ))}
       </div>
     </div>

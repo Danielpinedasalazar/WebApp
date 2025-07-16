@@ -16,12 +16,10 @@ const ProductCarousel = ({ data }: { data: Product[] }) => {
   return (
     <Carousel
       className='w-full mb-12'
-      opts={{
-        loop: true,
-      }}
+      opts={{ loop: true }}
       plugins={[
         Autoplay({
-          delay: 10000,
+          delay: 8000,
           stopOnInteraction: true,
           stopOnMouseEnter: true,
         }),
@@ -31,23 +29,24 @@ const ProductCarousel = ({ data }: { data: Product[] }) => {
         {data.map((product: Product) => (
           <CarouselItem key={product.id}>
             <Link href={`/product/${product.slug}`}>
-              <div className='relative mx-auto'>
+              <div className='relative mx-auto max-h-[400px] rounded-xl overflow-hidden shadow-md'>
                 {product.banner ? (
                   <Image
                     src={product.banner}
                     alt={product.name}
-                    height='0'
-                    width='0'
-                    sizes='100vw'
-                    className='w-full h-auto'
+                    height={400}
+                    width={1200}
+                    className='w-full h-64 object-cover'
+                    priority
                   />
                 ) : (
-                  <div className='w-full h-64 bg-gray-200 flex items-center justify-center'>
-                    <span className='text-gray-500'>No image available</span>
+                  <div className='w-full h-64 bg-muted flex items-center justify-center text-muted-foreground'>
+                    No image available
                   </div>
                 )}
-                <div className='absolute inset-0 flex items-end justify-center'>
-                  <h2 className='bg-gray-900 bg-opacity-50 text-2xl font-bold px-2 text-white'>
+
+                <div className='absolute bottom-0 left-0 right-0 bg-black/50 text-white px-6 py-4 text-center'>
+                  <h2 className='text-lg font-semibold truncate'>
                     {product.name}
                   </h2>
                 </div>
@@ -56,8 +55,9 @@ const ProductCarousel = ({ data }: { data: Product[] }) => {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
+
+      <CarouselPrevious className='hover:bg-muted hover:text-foreground' />
+      <CarouselNext className='hover:bg-muted hover:text-foreground' />
     </Carousel>
   );
 };
