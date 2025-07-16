@@ -1,14 +1,24 @@
 const encoder = new TextEncoder();
-const key = new TextEncoder().encode(process.env.ENCRYPTION_KEY); // Retrieve key from env var
 
-// Hash function with key-based encryption
+// Validamos que la variable exista y tenga contenido
+const envKey = process.env.ENCRYPTION_KEY;
+
+if (!envKey || envKey.trim() === '') {
+  throw new Error(
+    'ENCRYPTION_KEY is not defined or is empty in the environment variables'
+  );
+}
+
+const key = encoder.encode(envKey);
+
+// Función para hashear una contraseña con HMAC-SHA-256
 export const hash = async (plainPassword: string): Promise<string> => {
   const passwordData = encoder.encode(plainPassword);
 
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
     key,
-    { name: 'HMAC', hash: { name: 'SHA-256' } },
+    { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign', 'verify']
   );
@@ -19,7 +29,7 @@ export const hash = async (plainPassword: string): Promise<string> => {
     .join('');
 };
 
-// Compare function using key from env var
+// Función para comparar una contraseña en texto plano con una ya cifrada
 export const compare = async (
   plainPassword: string,
   encryptedPassword: string
@@ -27,25 +37,3 @@ export const compare = async (
   const hashedPassword = await hash(plainPassword);
   return hashedPassword === encryptedPassword;
 };
-// // Use Web Crypto API compatible with Edge Functions
-
-// const encoder = new TextEncoder();
-// const salt = crypto.getRandomValues(new Uint8Array(16)).join('');
-
-// // Hash function
-// export const hash = async (plainPassword: string): Promise<string> => {
-//   const passwordData = encoder.encode(plainPassword + salt);
-//   const hashBuffer = await crypto.subtle.digest('SHA-256', passwordData);
-//   return Array.from(new Uint8Array(hashBuffer))
-//     .map((b) => b.toString(16).padStart(2, '0'))
-//     .join('');
-// };
-
-// // Compare function
-// export const compare = async (
-//   plainPassword: string,
-//   encryptedPassword: string
-// ): Promise<boolean> => {
-//   const hashedPassword = await hash(plainPassword);
-//   return hashedPassword === encryptedPassword;
-// };
