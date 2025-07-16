@@ -1,7 +1,14 @@
 const encoder = new TextEncoder();
-const key = new TextEncoder().encode(process.env.ENCRYPTION_KEY); // Retrieve key from env var
 
-// Hash function with key-based encryption
+const rawKey = process.env.ENCRYPTION_KEY;
+
+if (!rawKey) {
+  throw new Error('ENCRYPTION_KEY is not defined in environment variables');
+}
+
+const key = encoder.encode(rawKey);
+
+// Hash function using Web Crypto API
 export const hash = async (plainPassword: string): Promise<string> => {
   const passwordData = encoder.encode(plainPassword);
 
@@ -10,16 +17,16 @@ export const hash = async (plainPassword: string): Promise<string> => {
     key,
     { name: 'HMAC', hash: { name: 'SHA-256' } },
     false,
-    ['sign', 'verify']
+    ['sign']
   );
 
   const hashBuffer = await crypto.subtle.sign('HMAC', cryptoKey, passwordData);
+
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
 };
 
-// Compare function using key from env var
 export const compare = async (
   plainPassword: string,
   encryptedPassword: string
