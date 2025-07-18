@@ -14,19 +14,26 @@ import { PAGE_SIZE } from '../constants';
 import { Prisma } from '@prisma/client';
 import { sendPurchaseReceipt } from '@/email';
 
-// Create order and create the order items
+//Crear las ordenes
 export async function createOrder() {
+  //Hallamos la sesion de usuario
   try {
     const session = await auth();
+    //Si no hay session lanzamos error
     if (!session) throw new Error('User is not authenticated');
 
+    //obtenemos el carrito
     const cart = await getMyCart();
+    //si user existe, tomamos el id
     const userId = session?.user?.id;
     if (!userId) throw new Error('User not found');
 
+    //Obtenemos el usuario por id
     const user = await getUserById(userId);
 
+    //Si el carrito no existe o es igual a cero
     if (!cart || cart.items.length === 0) {
+      //Mostramos un mensaje indicando
       return {
         success: false,
         message: 'Your cart is empty',
@@ -34,6 +41,7 @@ export async function createOrder() {
       };
     }
 
+    //Si no hay una direccion, mostramos un mensaje
     if (!user.address) {
       return {
         success: false,
@@ -50,7 +58,7 @@ export async function createOrder() {
       };
     }
 
-    // Create order object
+    //Creamos la orden, la vamos a insertar en el schema y parse va a validar cada uno de los datos
     const order = insertOrderSchema.parse({
       userId: user.id,
       shippingAddress: user.address,
@@ -61,21 +69,28 @@ export async function createOrder() {
       totalPrice: cart.totalPrice,
     });
 
-    // Create a transaction to create order and order items in database
+    /*Esta linea inicia una transaccion de la base de datos, lo que indica que o funcionan todos 
+    los datos o que no funcione nad. El parametro tx es como un "trabajdor especial", que va a manejar
+    todas las operaciones dentro de la transaccion*/
     const insertedOrderId = await prisma.$transaction(async (tx) => {
-      // Create order
+      //Aca vamos a acceder a la tabla order y vamos a crear una orden.
       const insertedOrder = await tx.order.create({ data: order });
-      // Create order items from the cart items
+
+      //inicaos un ciclo para recorrer todos los item del carrito (cart.items) y miramos que cada elemento es de CartItem[]
       for (const item of cart.items as CartItem[]) {
+        //Aqui es donde cada producto del carrito, se convierte en un item del pedido
         await tx.orderItem.create({
           data: {
+            //...item, copia toda la info del producto (nombre, marca, ...)
             ...item,
+            //se asegura que el precio es el mismo de el de la db
             price: item.price,
+            //insertOrder.id es el id de la orden recien creada
             orderId: insertedOrder.id,
           },
         });
       }
-      // Clear cart
+      //Luego de que se haya pagado limpiamos el carrito y lo dejamos listo para una nueva orden
       await tx.cart.update({
         where: { id: cart.id },
         data: {
@@ -87,11 +102,15 @@ export async function createOrder() {
         },
       });
 
+      //Queremos saber el id de la orden que acabamos de crear
+      //insertedOrderId = insertedorder.id
       return insertedOrder.id;
     });
 
+    //Si no existe la orden devolvemos error
     if (!insertedOrderId) throw new Error('Order not created');
 
+    //Si todo salio bien devolvemos un mesaje true y redireccionamos
     return {
       success: true,
       message: 'Order created',
@@ -103,36 +122,41 @@ export async function createOrder() {
   }
 }
 
-// Get order by id
+//Obtenemos la orden por el id que le pasamos en otro codigo
 export async function getOrderById(orderId: string) {
+  //Vamos a buscar la orden en donde el id sea igual a el orderId
   const data = await prisma.order.findFirst({
     where: {
       id: orderId,
     },
+    //Incdicamos que valores queremos devolver
     include: {
+      //devolvemos los items de la orden y el nombre y email del usuario
       orderitems: true,
       user: { select: { name: true, email: true } },
     },
   });
 
+  //pasamos a un objeto plano los datos obtenidos
   return convertToPlainObject(data);
 }
 
-// Create new paypal order
+//Creamos la orden para pagar con paypal, entonces le pasamos un id
 export async function createPayPalOrder(orderId: string) {
   try {
-    // Get order from database
+    //Obtenemos la orden desde la db
     const order = await prisma.order.findFirst({
       where: {
         id: orderId,
       },
     });
 
+    //Si la orden existe ...
     if (order) {
-      // Create paypal order
+      //Ahora le pasamos la orden a paypal, y lo convertimos a numero debido a que puede llegar como un string
       const paypalOrder = await paypal.createOrder(Number(order.totalPrice));
 
-      // Update order with paypal order id
+      //Busca la orden por su id
       await prisma.order.update({
         where: { id: orderId },
         data: {
@@ -145,6 +169,7 @@ export async function createPayPalOrder(orderId: string) {
         },
       });
 
+      //Devolvemos que fue exitoso
       return {
         success: true,
         message: 'Item order created successfully',
@@ -158,7 +183,7 @@ export async function createPayPalOrder(orderId: string) {
   }
 }
 
-// Approve paypal order and update order to paid
+//Orden aprovada
 export async function approvePayPalOrder(
   orderId: string,
   data: { orderID: string }

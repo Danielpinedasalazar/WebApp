@@ -10,14 +10,16 @@ const ProductCard = ({ product }: { product: Product }) => {
     <Card className='w-full max-w-sm border border-border shadow-sm rounded-xl hover:shadow-md transition'>
       <CardHeader className='p-0'>
         <Link href={`/product/${product.slug}`}>
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            height={300}
-            width={300}
-            priority
-            className='rounded-t-xl object-cover w-full h-auto transition-transform hover:scale-105'
-          />
+          <div className='relative w-full h-[250px] rounded-t-xl overflow-hidden'>
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              sizes='(max-width: 768px) 100vw, 33vw'
+              className='object-cover hover:scale-105 transition-transform duration-300 ease-in-out'
+              priority
+            />
+          </div>
         </Link>
       </CardHeader>
 

@@ -18,12 +18,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang='en' suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <head />
+      <body
+        className={`${inter.className} antialiased bg-background text-foreground`}
+      >
         <ThemeProvider
           attribute='class'
           defaultTheme='light'

@@ -9,13 +9,19 @@ import { cartItemSchema, insertCartSchema } from '../validators';
 import { revalidatePath } from 'next/cache';
 import { Prisma } from '@prisma/client';
 
-// Calculate cart prices
+//Aqui vamos a calcular los precios del carrito
+// le pasamos un item con un arreglo de CartItem[]
 const calcPrice = (items: CartItem[]) => {
+  //Definimos itemsPrice
   const itemsPrice = round2(
+      //.reduce: es una funcion de los array que acumula un valor a partir de todos los elementos
       items.reduce((acc, item) => acc + Number(item.price) * item.qty, 0)
     ),
+    //Si los items valen mas de 100, no se cobra, de lo contrario 10
     shippingPrice = round2(itemsPrice > 100 ? 0 : 10),
+    //El tax va a ser el valor de los item por el 0.15
     taxPrice = round2(0.15 * itemsPrice),
+    //El precio total es la suma de todos
     totalPrice = round2(itemsPrice + taxPrice + shippingPrice);
 
   return {
@@ -26,30 +32,40 @@ const calcPrice = (items: CartItem[]) => {
   };
 };
 
+//Funcion para añadir productos al carrito
 export async function addItemToCart(data: CartItem) {
   try {
-    // Check for cart cookie
+    /*Definimos sessionCartId la cual nos va a traer la sesion */
     const sessionCartId = (await cookies()).get('sessionCartId')?.value;
+    //Si la sesion no existe devolvemos un error
     if (!sessionCartId) throw new Error('Cart session not found');
 
-    // Get session and user ID
+    //Obtenemos la sesion desde auth
     const session = await auth();
+    /*definimos userId. Si existe la sesion nos pasa user, si existe user nos pasa el id
+    si eso es verdadero nos devuelve la sesion como un string, si es falso como undefined*/
     const userId = session?.user?.id ? (session.user.id as string) : undefined;
 
-    // Get cart
+    //Obtenemos el carrito
     const cart = await getMyCart();
 
-    // Parse and validate item
+    /*Aqui vamos a hacer una validacion
+    cartItemSchema: es un esquema que define como debe verse un item del carrito
+    .parse(data): toma los datos y los valida contra ese esquema, y si todo funciona lo guarda*/
     const item = cartItemSchema.parse(data);
 
-    // Find product in database
+    //Vamos e encontrar un producto en la db con ayuda de prisma
+    //prisma: accedemos a la db, product: nos vamos a la tabla de producto, findFirst: cogemos el primero
     const product = await prisma.product.findFirst({
+      //lo buscamos donde el id sea igual al id del producto
       where: { id: item.productId },
     });
+    //si no existe el producto lanzamos errror
     if (!product) throw new Error('Product not found');
 
+    //Si no existe el carrito
     if (!cart) {
-      // Create new cart object
+      //Creamos uno nuevo
       const newCart = insertCartSchema.parse({
         userId: userId,
         items: [item],
@@ -57,31 +73,33 @@ export async function addItemToCart(data: CartItem) {
         ...calcPrice([item]),
       });
 
-      // Add to database
+      //Añadimos el nuevo carrito a la db
       await prisma.cart.create({
         data: newCart,
       });
 
-      // Revalidate product page
+      //Ahora revalidamos la pagina para que se actualice el contenido
       revalidatePath(`/product/${product.slug}`);
 
+      //Si todo fue bien devolvemos un mensaje
       return {
         success: true,
         message: `${product.name} added to cart`,
       };
     } else {
-      // Check if item is already in cart
+      /*si no salioo bien buscamos */
       const existItem = (cart.items as CartItem[]).find(
         (x) => x.productId === item.productId
       );
 
+      //Si existe el item procedemos a chequear el stock
       if (existItem) {
-        // Check stock
+        //si ya no hay stock devolvemos error
         if (product.stock < existItem.qty + 1) {
           throw new Error('Not enough stock');
         }
 
-        // Increase the quantity
+        //
         (cart.items as CartItem[]).find(
           (x) => x.productId === item.productId
         )!.qty = existItem.qty + 1;
@@ -120,20 +138,22 @@ export async function addItemToCart(data: CartItem) {
   }
 }
 
+//Vamos a obtener el carrito
 export async function getMyCart() {
-  // Check for cart cookie
+  //chequeamos la cookie del carrito y si no existe devolvemos error
   const sessionCartId = (await cookies()).get('sessionCartId')?.value;
   if (!sessionCartId) throw new Error('Cart session not found');
 
-  // Get session and user ID
+  //Tomamos la sesion y el userId
   const session = await auth();
   const userId = session?.user?.id ? (session.user.id as string) : undefined;
 
-  // Get user cart from database
+  //definimos cart el cual va a encontrar donde si el userId existe, use ese de lo contrario use el sessionCartId
   const cart = await prisma.cart.findFirst({
     where: userId ? { userId: userId } : { sessionCartId: sessionCartId },
   });
 
+  //si no existe cart devolvemos undefined
   if (!cart) return undefined;
 
   // Convert decimals and return
@@ -147,31 +167,33 @@ export async function getMyCart() {
   });
 }
 
+//Funcion para quitar un item del carrito
 export async function removeItemFromCart(productId: string) {
   try {
     // Check for cart cookie
     const sessionCartId = (await cookies()).get('sessionCartId')?.value;
     if (!sessionCartId) throw new Error('Cart session not found');
 
-    // Get Product
+    //Vamos a buscar el producto donde el id sea igual al productId
     const product = await prisma.product.findFirst({
       where: { id: productId },
     });
+    //si no existe el producto devolvemos error
     if (!product) throw new Error('Product not found');
 
-    // Get user cart
+    //traemos el carrito, y si no existe pum! error
     const cart = await getMyCart();
     if (!cart) throw new Error('Cart not found');
 
-    // Check for item
+    //si existe lo bamos a buscar por el productId
     const exist = (cart.items as CartItem[]).find(
       (x) => x.productId === productId
     );
     if (!exist) throw new Error('Item not found');
 
-    // Check if only one in qty
+    //Si el producto el igual a 1
     if (exist.qty === 1) {
-      // Remove from cart
+      //
       cart.items = (cart.items as CartItem[]).filter(
         (x) => x.productId !== exist.productId
       );

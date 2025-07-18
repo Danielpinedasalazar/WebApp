@@ -9,13 +9,19 @@ import { ToastAction } from '@/components/ui/toast';
 import { addItemToCart, removeItemFromCart } from '@/lib/actions/cart.actions';
 import { useTransition } from 'react';
 
+/*DEfinimos el tipo de dos variables, cart y item. cart lleva un signo ? ya que puede que este vacio osea
+null y le pasamos el carrito, y item lo definimos de tipo CartItem*/
 const AddToCart = ({ cart, item }: { cart?: Cart; item: CartItem }) => {
   const router = useRouter();
   const { toast } = useToast();
+  //Definimos un arreglo con isPending para que cuando usemos useTransition, nos devuelva el valor y start transition lo actualice
   const [isPending, startTransition] = useTransition();
 
+  //Manejamos añadir al carrito
   const handleAddToCart = async () => {
+    //Aqui vamos a activar la trancision
     startTransition(async () => {
+      //Definimos la respuesta dependiendo del valor obtenido en la db
       const res = await addItemToCart(item);
 
       if (!res.success) {

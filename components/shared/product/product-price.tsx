@@ -12,13 +12,16 @@ const ProductPrice = ({ value, className }: ProductPriceProps) => {
   return (
     <p
       className={cn(
-        'text-xl font-semibold text-foreground tracking-tight',
+        'text-xl font-extrabold tracking-tight bg-gradient-to-br from-green-500 via-emerald-400 to-lime-400 bg-clip-text text-transparent',
+        'flex items-baseline gap-1',
         className
       )}
     >
-      <span className='text-sm align-super text-muted-foreground'>$</span>
+      <span className='text-sm font-medium align-super text-muted-foreground'>
+        $
+      </span>
       {intValue}
-      <span className='text-sm align-super text-muted-foreground'>
+      <span className='text-sm font-medium align-super text-muted-foreground'>
         .{floatValue}
       </span>
     </p>

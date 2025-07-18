@@ -22,22 +22,30 @@ const CategoryDrawer = async () => {
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className='h-full max-w-sm border-l border-border bg-background'>
+      <DrawerContent
+        className='h-full max-w-sm border-l border-border 
+        bg-gradient-to-br from-background via-muted/30 to-background 
+        backdrop-blur-sm shadow-xl'
+      >
         <DrawerHeader>
-          <DrawerTitle className='text-lg font-semibold'>
+          <DrawerTitle className='text-lg font-semibold mb-4 text-foreground'>
             Browse Categories
           </DrawerTitle>
-          <div className='space-y-2 mt-4'>
-            {categories.map((x) => (
+
+          <div className='space-y-2 divide-y divide-border'>
+            {categories.map((x, i) => (
               <DrawerClose asChild key={x.category}>
                 <Button
                   variant='ghost'
-                  className='w-full justify-start rounded-md text-sm font-medium hover:bg-muted transition'
+                  className='w-full justify-between items-center px-4 py-3 rounded-md 
+                  text-sm font-medium hover:bg-muted transition-all duration-200'
                   asChild
                 >
                   <Link href={`/search?category=${x.category}`}>
-                    {x.category}{' '}
-                    <span className='text-muted-foreground'>({x._count})</span>
+                    <span className='text-foreground'>{x.category}</span>
+                    <span className='text-muted-foreground text-xs font-normal'>
+                      ({x._count})
+                    </span>
                   </Link>
                 </Button>
               </DrawerClose>
