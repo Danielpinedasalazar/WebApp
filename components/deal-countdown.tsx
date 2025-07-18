@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from './ui/card';
-import { AlarmClock, Flame, Gift } from 'lucide-react';
+import { AlarmClock, Gift } from 'lucide-react';
 
 const TARGET_DATE = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 3); // 3 días desde ahora
 
@@ -39,8 +39,6 @@ const DealCountdown = () => {
 
     return () => clearInterval(timerInterval);
   }, []);
-
-  const hasEnded = time && Object.values(time).every((v) => v === 0);
 
   return (
     <section className='my-24 rounded-xl bg-gradient-to-br from-indigo-100 via-pink-100 to-yellow-100 shadow-2xl'>

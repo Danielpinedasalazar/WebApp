@@ -33,7 +33,7 @@ const CategoryDrawer = async () => {
           </DrawerTitle>
 
           <div className='space-y-2 divide-y divide-border'>
-            {categories.map((x, i) => (
+            {categories.map((x) => (
               <DrawerClose asChild key={x.category}>
                 <Button
                   variant='ghost'
