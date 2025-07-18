@@ -96,7 +96,7 @@ const sampleData = {
       numReviews: 12,
       stock: 8,
       isFeatured: true,
-      banner: null,
+      banner: '/images/banner-3.jpg',
     },
   ],
 };

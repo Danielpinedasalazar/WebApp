@@ -19,20 +19,20 @@ const ratings = [4, 3, 2, 1];
 
 const sortOrders = ['newest', 'lowest', 'highest', 'rating'];
 
-export async function generateMetadata(props: {
+// Función generateMetadata corregida con async/await
+export async function generateMetadata({
+  searchParams,
+}: {
   searchParams: Promise<{
-    q: string;
-    category: string;
-    price: string;
-    rating: string;
+    q?: string;
+    category?: string;
+    price?: string;
+    rating?: string;
   }>;
 }) {
-  const {
-    q = 'all',
-    category = 'all',
-    price = 'all',
-    rating = 'all',
-  } = await props.searchParams;
+  // Await searchParams antes de desestructurar
+  const params = await searchParams;
+  const { q = 'all', category = 'all', price = 'all', rating = 'all' } = params;
 
   const isQuerySet = q && q !== 'all' && q.trim() !== '';
   const isCategorySet = category && category !== 'all';
@@ -50,18 +50,21 @@ export async function generateMetadata(props: {
   };
 }
 
+// Componente SearchPage corregido con async/await
 const SearchPage = async ({
   searchParams,
 }: {
-  searchParams: {
+  searchParams: Promise<{
     q?: string;
     category?: string;
     price?: string;
     rating?: string;
     sort?: string;
     page?: string;
-  };
+  }>;
 }) => {
+  // Await searchParams antes de desestructurar
+  const params = await searchParams;
   const {
     q = 'all',
     category = 'all',
@@ -69,7 +72,7 @@ const SearchPage = async ({
     rating = 'all',
     sort = 'newest',
     page = '1',
-  } = searchParams;
+  } = params;
 
   const getFilterUrl = ({
     c,
@@ -84,13 +87,13 @@ const SearchPage = async ({
     r?: string;
     pg?: string;
   }) => {
-    const params = { q, category, price, rating, sort, page };
-    if (c) params.category = c;
-    if (p) params.price = p;
-    if (s) params.sort = s;
-    if (r) params.rating = r;
-    if (pg) params.page = pg;
-    return `/search?${new URLSearchParams(params).toString()}`;
+    const urlParams = { q, category, price, rating, sort, page };
+    if (c) urlParams.category = c;
+    if (p) urlParams.price = p;
+    if (s) urlParams.sort = s;
+    if (r) urlParams.rating = r;
+    if (pg) urlParams.page = pg;
+    return `/search?${new URLSearchParams(urlParams).toString()}`;
   };
 
   const products = await getAllProducts({
